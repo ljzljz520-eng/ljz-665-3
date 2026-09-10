@@ -1,0 +1,14 @@
+{
+  "name": "fire-equipment-admin",
+  "version": "1.0.0",
+  "description": "消防器材管理模块（器材台账 / 搜索 / 导入导出 / 附件照片 / 停用报废操作记录）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "multer": "^2.3.0"
+  }
+}
