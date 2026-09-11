@@ -455,7 +455,7 @@ app.post('/api/import', (req, res) => {
     '状态': 'status',
     '备注': 'remark',
   };
-  const cnStatus = { '在用': 'normal', '正常': 'normal', '停用': 'disabled', '报废': 'scrapped' };
+  const cnStatus = { '在用': 'normal', '正常': 'normal', '停用': 'disabled', '报废': 'scrapped', '超期未检': 'normal' };
 
   const result = { inserted: 0, updated: 0, failed: 0, errors: [] };
 
@@ -470,7 +470,16 @@ app.post('/api/import', (req, res) => {
       const m = row.inspectDate.match(/^(\d{4})[/-](\d{1,2})[/-](\d{1,2})/);
       if (m) row.inspectDate = `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
     }
-    if (row.status) row.status = cnStatus[row.status] || row.status;
+    // 状态校验：不识别的值必须逐行报错，不能静默落库为「在用」
+    if (row.status) {
+      const rawStatus = row.status;
+      row.status = cnStatus[rawStatus] || rawStatus;
+      if (!FLOW_STATUS.includes(row.status)) {
+        result.failed++;
+        result.errors.push(`第 ${i + 2} 行（${row.code || '无编号'}）：状态「${rawStatus}」无法识别，请填写：在用 / 停用 / 报废`);
+        return;
+      }
+    }
 
     const rec = normalize(row);
     const errs = validate(rec);
